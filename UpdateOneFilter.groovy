@@ -19,8 +19,8 @@ def response = get(url).header('Content-Type', 'application/json').asObject(Map)
 
 def newOwnerAccountId = response.body.users.accountId[0]
 
-if (filterId.size() == 0 && newOwnerAccountId.size() == 0 && newOwnerAccountId.size() == 0) {
-        return "You must specify a filter id and the accountId for the new user to be able to change a filter or dashboards ownership"
+if (filterId.size() == 0 && newOwnerAccountId.size() == 0) {
+        return "You must specify a filter id and the accountId for the new user to be able to change a filter's ownership"
 }
 
 if (filterId.size() > 0) {
