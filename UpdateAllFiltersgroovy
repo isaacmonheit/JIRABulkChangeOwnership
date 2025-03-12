@@ -2,44 +2,85 @@
 // Created by Isaac Monheit on 10-Mar-2025
 // Last updated 10-Mar-2025
 // 
+// USER INPUT NECCESARY BELOW!
 // Updates the ownership of all the filters owned by one user (email specified below) to a new owner (email specified below)
 // Run in the "Script Console" section of ScriptRunner in the 'ccc-sandbox-385' testing environment
+// ***NOTE: Ignore the red underlines, the script still works just fine but thinks there are errors***
+//
+// This code doesn't run fully correctly on some user's filters. Seems like it isn't recognizing all ownered filters sometimes, but not always.
+//
+// Questions for David Carrera:
+//  * What Object type would you recommend converting to in general, I am using Map because someone else did, but is something like JSON usually better
+//  * What about the error bars under "response.body.users.accountId[0]"
 
 
-// Enter the email of the current owner
-String oldOwnerEmail = "imonheit@copyright.com"
+// USER INPUT NECCESARY HERE:
+// Enter the copyright.com username of the current (source) owner
+String currentOwnerUsername = "jjmartin"
+// Enter the copyright.com username of the future (destination) owner
+String futureOwnerUsername = "imonheit"
+
+
+// Convert from username to email
+String oldOwnerEmail = currentOwnerUsername + "@copyright.com"
+String newOwnerEmail = futureOwnerUsername + "@copyright.com"
+
+
+// Getting old owner account Id from email
 def url = "/rest/api/3/user/picker?query=${oldOwnerEmail}"
 def response = get(url).header('Content-Type', 'application/json').asObject(Map)
-def oldOwnerAccountID = response.body.users.accountId[0]
+def oldOwnerAccountId = response.body.users.accountId[0]
 
-return oldOwnerAccountID
-def filterId = '18562'
+// Getting new owner account Id from email
+def url2 = "/rest/api/3/user/picker?query=${newOwnerEmail}"
+def response2 = get(url2).header('Content-Type', 'application/json').asObject(Map)
+def newOwnerAccountId = response2.body.users.accountId[0]
 
-// Enter the email of the new desired owner
-String newOwnerEmail = "imonheit@copyright.com"
-
-
-
-def url = "/rest/api/3/user/picker?query=${newOwnerEmail}"
-def response2 = get(url).header('Content-Type', 'application/json').asObject(Map)
-def newOwnerAccountID = response2.body.users.accountId[0]
-
-if (oldOwnerAccountID.size() == 0 && newOwnerAccountID.size() == 0) {
+// Return early if either the old owner or new owner don't exist in Jira
+if (oldOwnerAccountId == null || newOwnerAccountId == null) {
         return "You must specify a correct email for the old owner and new owner to be able to change a filter's ownership"
 }
 
 
+// Gathering a list of all filter IDs by associated account
+def url3 = "/rest/api/3/filter/search?accountId=${oldOwnerAccountId}"
+def response3 = get(url3)
+                    .header('Content-Type', 'application/json')
+                    .asObject(Map)
+def listOfFiltersOldAccount = response3.body.values.collect { it.id } 
 
-if (filterId.size() > 0) {
-    def updateFilterOwner = put("/rest/api/3/filter/${filterId}/owner")
-            .header('Content-Type', 'application/json')
-            .body([
-                    accountId: newOwnerAccountId
-            ])
-            .asString()
 
-    assert updateFilterOwner.status >= 200 && updateFilterOwner.status < 300
 
-    //need to change
-    logger.info("The filter with the Id: ${filterId} was updated to be owned by the user with the accountId of ${newOwnerAccountID}.")
+// Updating each filter in the list to the new owner
+if (listOfFiltersOldAccount.size() > 0) {
+    def successfulTransfers = 0
+    def failedTransfers = []
+
+    listOfFiltersOldAccount.each { id ->
+        def updateFilterOwner = put("/rest/api/3/filter/${id}/owner")
+                .header('Content-Type', 'application/json')
+                .body([
+                        accountId: newOwnerAccountId
+                ])
+                .asString()
+
+        if (updateFilterOwner.status >= 200 && updateFilterOwner.status < 300) { // If the transfer works
+            successfulTransfers++
+            logger.info("The filter with the Id: ${id} was successfully transferred to ${newOwnerEmail}.")
+        } else { // If the transfer doesn't work
+            failedTransfers << id
+            logger.error("Failed to update filter with the Id: ${id}.")
+        }
+    }
+
+    def totalFilters = listOfFiltersOldAccount.size()
+    def resultMessage = "${successfulTransfers} of ${totalFilters} filters have been transferred to ${newOwnerEmail} successfully."
+
+    if (failedTransfers) {
+        resultMessage += "\nFailed filter IDs: ${failedTransfers.join(', ')}"
+    }
+
+    return resultMessage
 }
+
+return "No filters to change!"
