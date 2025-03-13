@@ -3,10 +3,10 @@
 // Last updated 13-Mar-2025
 // 
 // USER INPUT NECCESARY BELOW!
-// - Updates the ownership of all the filters owned by one user (email specified below) to a new owner (email specified below)
+// - Updates the ownership of all the filters owned by one user (username specified below) to a new owner (username specified below)
 // - Run in the "Script Console" section of ScriptRunner in the 'ccc-sandbox-385' testing environment
 // - Can change a maximum of 500 filters at once
-// ***NOTE: Ignore the red underlines, the script still works just fine but thinks there are errors***
+// ***NOTE: Ignore the red underlines, the script still works just fine but ScriptRunner thinks there are errors***
 //
 
 // USER INPUT NECCESARY HERE:
@@ -72,7 +72,7 @@ if (listOfFiltersOldAccount.size() > 0) {
     def resultMessage = "${successfulTransfers} of ${totalFilters} filters have been transferred to ${newOwnerEmail} successfully."
 
     if (failedTransfers) {
-        resultMessage += "\nFailed filter IDs: ${failedTransfers.join(', ')}"
+        resultMessage += "Failed filter IDs: ${failedTransfers.join(', ')}"
     }
 
     return resultMessage
