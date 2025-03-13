@@ -1,24 +1,19 @@
 // UpdateAllFilters
 // Created by Isaac Monheit on 10-Mar-2025
-// Last updated 10-Mar-2025
+// Last updated 13-Mar-2025
 // 
 // USER INPUT NECCESARY BELOW!
-// Updates the ownership of all the filters owned by one user (email specified below) to a new owner (email specified below)
-// Run in the "Script Console" section of ScriptRunner in the 'ccc-sandbox-385' testing environment
+// - Updates the ownership of all the filters owned by one user (email specified below) to a new owner (email specified below)
+// - Run in the "Script Console" section of ScriptRunner in the 'ccc-sandbox-385' testing environment
+// - Can change a maximum of 500 filters at once
 // ***NOTE: Ignore the red underlines, the script still works just fine but thinks there are errors***
 //
-// This code doesn't run fully correctly on some user's filters. Seems like it isn't recognizing all ownered filters sometimes, but not always.
-//
-// Questions for David Carrera:
-//  * What Object type would you recommend converting to in general, I am using Map because someone else did, but is something like JSON usually better
-//  * What about the error bars under "response.body.users.accountId[0]"
-
 
 // USER INPUT NECCESARY HERE:
 // Enter the copyright.com username of the current (source) owner
-String currentOwnerUsername = "jjmartin"
+String currentOwnerUsername = ""
 // Enter the copyright.com username of the future (destination) owner
-String futureOwnerUsername = "imonheit"
+String futureOwnerUsername = ""
 
 
 // Convert from username to email
@@ -43,7 +38,7 @@ if (oldOwnerAccountId == null || newOwnerAccountId == null) {
 
 
 // Gathering a list of all filter IDs by associated account
-def url3 = "/rest/api/3/filter/search?accountId=${oldOwnerAccountId}"
+def url3 = "/rest/api/3/filter/search?accountId=${oldOwnerAccountId}&overrideSharePermissions=true&maxResults=500"
 def response3 = get(url3)
                     .header('Content-Type', 'application/json')
                     .asObject(Map)
