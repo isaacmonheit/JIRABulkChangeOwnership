@@ -1,0 +1,6 @@
+[mimo-full-team, jira-administrators, jira-users, it-ops, SaaS-Operations]
+ "06750079-4109-4549-92f0-aff324fb2acc",
+    "8b7ef507-70bd-45b8-876a-225a0b3b0687",
+    "615654da-65d3-4ad3-ac24-01db57658a02",
+    "92b36212-a4e6-4a60-8250-870f3fbb3469",
+    "ed269197-0809-439d-90a2-679f19e84f1c"
